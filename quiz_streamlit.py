@@ -35,7 +35,8 @@ class QuizApp:
             'questions': [],
             'current_question_index': 0,
             'user_answers': [],
-            'results': []
+            'results': [],
+            'first_quiz_completed': False  # Add this line
         }
         
         for key, default in defaults.items():
@@ -309,6 +310,24 @@ class QuizApp:
         
         # Calculate score
         score = sum(1 for result in st.session_state.results if result['is_correct'])
+        
+        # First Quiz Celebration Popup
+        if 'first_quiz_completed' not in st.session_state or not st.session_state.first_quiz_completed:
+            st.session_state.first_quiz_completed = True
+            st.balloons()  # Add some celebration
+            st.toast("🎉 Congratulations on completing your first quiz!", icon="🐼")
+            
+            # Creator credit popup
+            st.info("""
+            ### 🌟 A Special Note 🌟
+            
+            This awesome Quiz app was created by **Caleb Lim**! 
+            
+            If you enjoyed this app, send some love ❤️❤️❤️ 
+            👩‍💻✨ If you ever need help with coding stuff like this let me know! 
+            
+            Keep quizzing and all the best for the exam! 🧠🎉
+            """)
         
         # Score Display
         cols = st.columns([2,1,2])
