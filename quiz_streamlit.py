@@ -42,37 +42,63 @@ class QuizApp:
             if key not in st.session_state:
                 st.session_state[key] = default
 
-    def initialize_user_database(self):
-        """Initialize the user's database with questions from the original database."""
-        # If user's database doesn't exist, copy from the main database
-        if not os.path.exists(self.db_path):
+def initialize_user_database(self):
+    """Initialize the user's database with questions from the original database."""
+    # Connect to the user's new database
+    user_conn = sqlite3.connect(self.db_path)
+    user_cursor = user_conn.cursor()
+    
+    try:
+        # Create the questions table if it doesn't exist
+        user_cursor.execute('''
+            CREATE TABLE IF NOT EXISTS questions (
+                id INTEGER PRIMARY KEY,
+                question TEXT,
+                option1 TEXT,
+                option2 TEXT,
+                option3 TEXT,
+                option4 TEXT,
+                option5 TEXT,
+                answer TEXT,
+                has_asked BOOLEAN DEFAULT 0,
+                user_answered_correctly BOOLEAN DEFAULT 0
+            )
+        ''')
+        
+        # Check if the table is empty
+        user_cursor.execute("SELECT COUNT(*) FROM questions")
+        count = user_cursor.fetchone()[0]
+        
+        # If the table is empty, copy questions from the main database
+        if count == 0:
             # Connect to the original database
             main_conn = sqlite3.connect("questions.db")
-            # Connect to the user's new database
-            user_conn = sqlite3.connect(self.db_path)
+            main_cursor = main_conn.cursor()
             
-            # Create the same table structure
-            user_conn.execute('''
-                CREATE TABLE IF NOT EXISTS questions (
-                    id INTEGER PRIMARY KEY,
-                    question TEXT,
-                    option1 TEXT,
-                    option2 TEXT,
-                    option3 TEXT,
-                    option4 TEXT,
-                    option5 TEXT,
-                    answer TEXT,
-                    has_asked BOOLEAN DEFAULT 0,
-                    user_answered_correctly BOOLEAN DEFAULT 0
-                )
-            ''')
+            # Fetch all questions from the main database
+            main_cursor.execute("SELECT * FROM questions")
+            questions = main_cursor.fetchall()
             
-            # Copy all questions from the main database
-            main_conn.backup(user_conn)
+            # Insert questions into the user's database
+            user_cursor.executemany('''
+                INSERT INTO questions 
+                (id, question, option1, option2, option3, option4, option5, answer, has_asked, user_answered_correctly) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', questions)
             
-            # Close connections
+            # Commit changes and close main database connection
+            main_conn.commit()
             main_conn.close()
-            user_conn.close()
+        
+        # Commit changes to user database
+        user_conn.commit()
+    
+    except sqlite3.Error as e:
+        st.error(f"Database initialization error: {e}")
+    
+    finally:
+        # Always close the user database connection
+        user_conn.close()
 
     def connect_to_database(self):
         """Establish a connection to the user's SQLite database."""
