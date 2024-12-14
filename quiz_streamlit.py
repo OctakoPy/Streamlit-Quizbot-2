@@ -311,23 +311,37 @@ class QuizApp:
         # Calculate score
         score = sum(1 for result in st.session_state.results if result['is_correct'])
         
-        # First Quiz Celebration Popup
-        if 'first_quiz_completed' not in st.session_state or not st.session_state.first_quiz_completed:
-            st.session_state.first_quiz_completed = True
-            st.balloons()  # Add some celebration
-            st.toast("🎉 Congratulations on completing your first quiz!", icon="🐼")
+        # Check if this is the first quiz and show creator popup
+        # We'll use a more explicit method to track first quiz
+        if not hasattr(st.session_state, 'creator_credit_shown'):
+            # Create the attribute and set it to True to prevent repeated popups
+            st.session_state.creator_credit_shown = True
             
-            # Creator credit popup
-            st.info("""
-            ### 🌟 A Special Note 🌟
-            
-            This awesome Quiz app was created by **Caleb Lim**! 
-            
-            If you enjoyed this app, send some love ❤️❤️❤️ 
-            👩‍💻✨ If you ever need help with coding stuff like this let me know! 
-            
-            Keep quizzing and all the best for the exam! 🧠🎉
-            """)
+            # Create a full-screen popup
+            with st.container():
+                st.balloons()  # Celebration effect
+                
+                # Large, centered popup
+                popup_col1, popup_col2, popup_col3 = st.columns([1,3,1])
+                with popup_col2:
+                    st.markdown("""
+                    <div style="background-color:#f0f2f6; padding:30px; border-radius:10px; text-align:center;">
+                    <h2>🌟 First Quiz Celebration! 🌟</h2>
+                    
+                    <p>This Quiz app was created by:</p>
+                    
+                    <h3>✨ Caleb Lim ✨</h3>
+                    
+                    <p>If you enjoyed this app, send some love ❤️❤️❤️</p>
+                    
+                    <p>👩‍💻✨ If you ever need help with coding stuff like this let me know!</p>
+                    <p>Keep quizzing and all the best for the exam! 🧠🎉</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Add a close button
+                    if st.button("Cool, thanks! 👍", key="creator_credit_close"):
+                        st.experimental_rerun()
         
         # Score Display
         cols = st.columns([2,1,2])
