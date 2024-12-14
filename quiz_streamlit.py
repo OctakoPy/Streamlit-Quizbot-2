@@ -380,6 +380,7 @@ class QuizApp:
 def main():
     """Initialize and run the Quiz Master application."""
     app = QuizApp()
+    app.reset_all_questions()
     app.run()
 
 if __name__ == "__main__":
