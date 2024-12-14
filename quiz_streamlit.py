@@ -325,7 +325,7 @@ class QuizApp:
                 popup_col1, popup_col2, popup_col3 = st.columns([1,3,1])
                 with popup_col2:
                     st.markdown("""
-                    <div style="background-color:#f0f2f6; padding:30px; border-radius:10px; text-align:center;">
+                    <div style="background-color:#f0f2f6; padding:30px; border-radius:10px; text-align:center; color:#000;">
                     <h2>🌟 First Quiz Celebration! 🌟</h2>
                     
                     <p>This Quiz app was created by:</p>
